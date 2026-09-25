@@ -9,7 +9,7 @@ Entity-oriented persistent memory MCP server for coding agents. Single staticall
 Breaking any of these is a bug, not a trade-off.
 
 1. **Every memory links to at least one entity.** Creating a memory with no links is rejected, and so is removing a memory's last link.
-2. **Creating a record requires the current placeholder uuid** for its kind (entity or memory). See [Search before create](#search-before-create).
+2. **Creating an entity or memory requires the current placeholder uuid** for its kind. See [Search before create](#search-before-create).
 3. **MCP and CLI have exact parity.** Every capability is implemented once in `internal/service` and exposed through both an MCP tool and a cobra command. Adding one without the other is a bug, and a test enumerates both surfaces and fails on any mismatch.
 4. **Entity names and aliases are unique per type, case-insensitively.** Checked on create and update against every name and alias of entities of the same type.
 5. **Types are closed sets defined in code.** Entity types, link types, and edge types are never free-form. An unknown type is rejected with an error listing the valid ones.
@@ -19,18 +19,18 @@ Breaking any of these is a bug, not a trade-off.
 - **Entity:** uuid, name, aliases, description (one line), type, timestamps.
   Types: `person`, `organization`, `project`, `repository`, `service`, `tool`, `place`, `concept`.
 - **Memory:** uuid, title, content (free text), timestamps. No tags.
-- **Link** (memory → entity): memory uuid, link type, entity uuid.
+- **Link** (memory → entity): memory uuid, link type, entity uuid. Identified by that triple.
   Types: `attribute`, `preference`, `event`, `decision`, `mention`.
-- **Edge** (entity → entity): uuid, from, edge type, to. Directional and stored once. Queries from the `to` side report the inverse name.
+- **Edge** (entity → entity): from, edge type, to. Identified by that triple. Directional and stored once, and a symmetric type is stored in one canonical direction so `A spouse_of B` and `B spouse_of A` are the same edge. Queries from the `to` side report the inverse name.
   Types and inverses: `parent_of`/`child_of`, `spouse_of` (symmetric), `sibling_of` (symmetric), `member_of`/`has_member`, `owns`/`owned_by`, `works_on`/`worked_on_by`, `part_of`/`has_part`, `depends_on`/`depended_on_by`, `uses`/`used_by`, `related_to` (symmetric).
 
-Every record gets a Loci-generated uuid, returned in every result. There is no edit history.
+Entities and memories get a Loci-generated uuid, returned in every result. Links and edges have no uuid of their own: their identity is exact, so a uuid would only be a second name for the triple. For the same reason they need no search-before-create placeholder; a duplicate is detected exactly, and the fuzzy part (which entity) was already resolved by the search that produced the entity uuid. There is no edit history.
 
 ### What can change
 
 - Entity name, aliases, description, and type: explicit edits only. Renaming does **not** add the old name as an alias. If the old name still matters, the caller adds the alias itself (an automatic alias would keep typo fixes like "Davd" around forever).
 - Memory title and content: editable. Links: add and remove only, never retyped.
-- Links and edges: create and delete only. Creating an edge that already exists is a no-op that returns the existing edge.
+- Links and edges: create and delete only, both addressed by their triple. Creating one that already exists is a no-op that returns the existing record.
 
 ### Deletes
 
@@ -67,6 +67,7 @@ Rejected alternatives: separate search tokens (the user dislikes passing tokens 
 - **MCP:** mcp-go over stdio, proxied to a shared daemon.
 - **CLI:** cobra. **Config:** viper.
 - **Daemon:** as in engRam. The first client to need the database spawns a daemon that owns it, and every MCP session and every CLI command connects over a unix socket. The CLI never opens the bbolt file directly, since bbolt locks it to one process.
+- **The socket speaks only MCP.** MCP sessions are a byte pipe between stdio and the socket. Each CLI command is an MCP client (mcp-go `transport.NewIO` over the socket) that makes one `tools/call` and formats the result, and `--json` prints the tool's structured result as is. Rejected: a second RPC protocol for the CLI, which would be a second wire format to keep in sync with the tools.
 
 ## CLI
 
