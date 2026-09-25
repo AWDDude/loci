@@ -49,10 +49,10 @@ Every store operation is one bbolt transaction. Invariants that span records are
 
 Each ends with `task test` passing.
 
-- [ ] **1. Scaffold.** `go.mod`, `Taskfile.yml` (`build`, `test`), cobra root, `loci version` with ldflags injection, viper config (XDG paths, `LOCI_*` overrides, `--config`, never writes the file).
+- [x] **1. Scaffold.** `go.mod`, `Taskfile.yml` (`build`, `test`), cobra root, `loci version` with ldflags injection, viper config (XDG paths, `LOCI_*` overrides, `--config`, never writes the file).
 - [ ] **2. Domain and store.** Closed type sets with inverse names, name normalization and validation, the case-fold function, bbolt schema and CRUD with the invariants above.
 - [ ] **3. Search.** Trigram and BM25 indexes, fused entity ranking, memory BM25.
 - [ ] **4. Service.** Every tool in the table, including placeholder rotation on every search and create. Most tests live here.
 - [ ] **5. MCP.** Tool adapters over the service, tested with mcp-go's in-process client.
 - [ ] **6. Daemon.** Port engRam's spawn lock, ownership lock, version preamble, idle shutdown, and `loci serve` (the stdio ↔ socket pipe).
-- [ ] **7. CLI.** Cobra commands that call tools through an mcp-go client over the socket. Human-readable tables by default, `--json` prints the structured result. Parity test comparing registered tools with cobra commands. End-to-end integration test through a real daemon.
+- [ ] **7. CLI.** Cobra commands that call tools through an mcp-go client over the socket. Human-readable tables by default, `--json` prints the structured result. Parity test comparing registered tools with cobra commands, with an explicit allowlist for commands that are not tools (`version`, `serve`, `daemon`). End-to-end integration test through a real daemon.
