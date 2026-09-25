@@ -43,6 +43,10 @@ Every store operation is one bbolt transaction. Invariants that span records are
 
 - Case folding: `cases.Fold()` from `golang.org/x/text`, in one function used by search and uniqueness checks.
 - Symmetric edges are stored with `from` < `to` by uuid, so both orderings resolve to one key.
+- `edge_create` and `edge_delete` accept inverse names too (`B child_of A` is stored as `A parent_of B`), so a caller can reuse the name `entity_get` showed it from either end.
+- An edge from an entity to itself is rejected.
+- A create that fails for any reason other than a stale placeholder (a taken name, a missing entity) leaves the placeholder unchanged, so the caller can fix the input and retry without searching again.
+- Deleting an entity also removes the links pointing at it, not just its edges.
 - Entity ranking fuses the trigram and BM25 rankings with reciprocal rank fusion (k = 60), as engRam fuses its legs.
 
 ## Milestones
@@ -50,7 +54,7 @@ Every store operation is one bbolt transaction. Invariants that span records are
 Each ends with `task test` passing.
 
 - [x] **1. Scaffold.** `go.mod`, `Taskfile.yml` (`build`, `test`), cobra root, `loci version` with ldflags injection, viper config (XDG paths, `LOCI_*` overrides, `--config`, never writes the file).
-- [ ] **2. Domain and store.** Closed type sets with inverse names, name normalization and validation, the case-fold function, bbolt schema and CRUD with the invariants above.
+- [x] **2. Domain and store.** Closed type sets with inverse names, name normalization and validation, the case-fold function, bbolt schema and CRUD with the invariants above.
 - [ ] **3. Search.** Trigram and BM25 indexes, fused entity ranking, memory BM25.
 - [ ] **4. Service.** Every tool in the table, including placeholder rotation on every search and create. Most tests live here.
 - [ ] **5. MCP.** Tool adapters over the service, tested with mcp-go's in-process client.

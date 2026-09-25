@@ -99,6 +99,7 @@ The daemon's runtime files sit beside the database, so a config with a different
 cmd/loci/           # entry point, cobra root
 internal/config/    # viper loading and defaults
 internal/daemon/    # socket, spawn, serve loop
+internal/model/     # records, closed type sets, name normalization and Fold
 internal/store/     # bbolt schema, trigram and BM25 indexes
 internal/service/   # every capability, implemented once
 internal/mcp/       # thin MCP tool adapters over service
