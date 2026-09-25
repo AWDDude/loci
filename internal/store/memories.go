@@ -20,6 +20,8 @@ func (s *Store) CreateMemory(placeholder string, m model.Memory, links []model.L
 	if len(links) == 0 {
 		return model.Memory{}, nil, ErrNoLinks
 	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	var stored []model.Link
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		if err := consumePlaceholder(tx, KindMemory, placeholder); err != nil {
@@ -44,6 +46,7 @@ func (s *Store) CreateMemory(placeholder string, m model.Memory, links []model.L
 	if err != nil {
 		return model.Memory{}, nil, err
 	}
+	setMemoryIndex(s.memoryIx, m)
 	return m, stored, nil
 }
 
@@ -67,6 +70,8 @@ func (s *Store) GetMemory(id string) (model.Memory, []model.Link, error) {
 
 // UpdateMemory replaces the title and content of the memory with m.ID.
 func (s *Store) UpdateMemory(m model.Memory) (model.Memory, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketMemories)
 		var old model.Memory
@@ -80,12 +85,15 @@ func (s *Store) UpdateMemory(m model.Memory) (model.Memory, error) {
 	if err != nil {
 		return model.Memory{}, err
 	}
+	setMemoryIndex(s.memoryIx, m)
 	return m, nil
 }
 
 // DeleteMemory removes the memory and its links.
 func (s *Store) DeleteMemory(id string) error {
-	return s.db.Update(func(tx *bolt.Tx) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	err := s.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketMemories)
 		if b.Get([]byte(id)) == nil {
 			return notFound("memory", id)
@@ -101,6 +109,11 @@ func (s *Store) DeleteMemory(id string) error {
 		}
 		return b.Delete([]byte(id))
 	})
+	if err != nil {
+		return err
+	}
+	s.memoryIx.remove(id)
+	return nil
 }
 
 // LinkedMemory is a memory as reached through one of its links to an entity.

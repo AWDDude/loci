@@ -8,7 +8,7 @@ Each tool below is one `internal/service` method, one MCP tool, and one cobra co
 
 | Area   | Tool            | Notes |
 |--------|-----------------|-------|
-| Entity | `entity_search` | Trigram + BM25 over name, aliases, description. Ends with the `(new)` placeholder row. |
+| Entity | `entity_search` | Trigram + BM25 over name, aliases, description, with an optional type filter. Ends with the `(new)` placeholder row. |
 |        | `entity_create` | Requires the entity placeholder uuid. |
 |        | `entity_get`    | The entity, its edges (neighbor name and type, direction-resolved edge name), and the titles of its linked memories grouped by link type. |
 |        | `entity_update` | Name, aliases, description, type. Re-checks uniqueness against the (possibly new) type. |
@@ -48,6 +48,8 @@ Every store operation is one bbolt transaction. Invariants that span records are
 - A create that fails for any reason other than a stale placeholder (a taken name, a missing entity) leaves the placeholder unchanged, so the caller can fix the input and retry without searching again.
 - Deleting an entity also removes the links pointing at it, not just its edges.
 - Entity ranking fuses the trigram and BM25 rankings with reciprocal rank fusion (k = 60), as engRam fuses its legs.
+- Trigram matching compares the query against each whole name and alias and against each of their words, taking the best (like pg_trgm's `word_similarity`), so "davd" finds "David Kittle". Threshold 0.3.
+- Search indexes are in memory, rebuilt on open, and updated under the same lock as the write that changes them.
 
 ## Milestones
 
@@ -55,7 +57,7 @@ Each ends with `task test` passing.
 
 - [x] **1. Scaffold.** `go.mod`, `Taskfile.yml` (`build`, `test`), cobra root, `loci version` with ldflags injection, viper config (XDG paths, `LOCI_*` overrides, `--config`, never writes the file).
 - [x] **2. Domain and store.** Closed type sets with inverse names, name normalization and validation, the case-fold function, bbolt schema and CRUD with the invariants above.
-- [ ] **3. Search.** Trigram and BM25 indexes, fused entity ranking, memory BM25.
+- [x] **3. Search.** Trigram and BM25 indexes, fused entity ranking, memory BM25.
 - [ ] **4. Service.** Every tool in the table, including placeholder rotation on every search and create. Most tests live here.
 - [ ] **5. MCP.** Tool adapters over the service, tested with mcp-go's in-process client.
 - [ ] **6. Daemon.** Port engRam's spawn lock, ownership lock, version preamble, idle shutdown, and `loci serve` (the stdio ↔ socket pipe).

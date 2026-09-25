@@ -16,6 +16,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -59,6 +60,13 @@ var (
 type Store struct {
 	db  *bolt.DB
 	now func() time.Time
+
+	// mu guards the in-memory search indexes. A write that changes indexed
+	// text holds it across both its transaction and the index update, so two
+	// writers to one record cannot commit in one order and index in the other.
+	mu       sync.RWMutex
+	entityIx *entityIndex
+	memoryIx *bm25Index
 }
 
 // Open opens or creates the database at path, creating its directory if
@@ -90,7 +98,12 @@ func Open(path string) (*Store, error) {
 		db.Close()
 		return nil, err
 	}
-	return &Store{db: db, now: func() time.Time { return time.Now().UTC() }}, nil
+	s := &Store{db: db, now: func() time.Time { return time.Now().UTC() }}
+	if err := s.rebuildIndexes(); err != nil {
+		db.Close()
+		return nil, err
+	}
+	return s, nil
 }
 
 // Close releases the database file.

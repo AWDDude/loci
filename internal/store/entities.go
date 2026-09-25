@@ -47,6 +47,8 @@ func (e *EntityInUseError) Error() string {
 // CreateEntity stores e under a new uuid. placeholder must be the current
 // entity placeholder.
 func (s *Store) CreateEntity(placeholder string, e model.Entity) (model.Entity, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		if err := consumePlaceholder(tx, KindEntity, placeholder); err != nil {
 			return err
@@ -62,6 +64,7 @@ func (s *Store) CreateEntity(placeholder string, e model.Entity) (model.Entity, 
 	if err != nil {
 		return model.Entity{}, err
 	}
+	s.entityIx.set(e)
 	return e, nil
 }
 
@@ -78,6 +81,8 @@ func (s *Store) GetEntity(id string) (model.Entity, error) {
 // entity with e.ID. Uniqueness is checked against e.Type, so changing type
 // is checked against the entities of the new type.
 func (s *Store) UpdateEntity(e model.Entity) (model.Entity, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	err := s.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(bucketEntities)
 		var old model.Entity
@@ -94,13 +99,16 @@ func (s *Store) UpdateEntity(e model.Entity) (model.Entity, error) {
 	if err != nil {
 		return model.Entity{}, err
 	}
+	s.entityIx.set(e)
 	return e, nil
 }
 
 // DeleteEntity removes the entity with its edges and links. It is refused
 // with an *EntityInUseError if any memory links to no other entity.
 func (s *Store) DeleteEntity(id string) error {
-	return s.db.Update(func(tx *bolt.Tx) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	err := s.db.Update(func(tx *bolt.Tx) error {
 		entities := tx.Bucket(bucketEntities)
 		if entities.Get([]byte(id)) == nil {
 			return notFound("entity", id)
@@ -149,6 +157,11 @@ func (s *Store) DeleteEntity(id string) error {
 		}
 		return entities.Delete([]byte(id))
 	})
+	if err != nil {
+		return err
+	}
+	s.entityIx.remove(id)
+	return nil
 }
 
 // checkUnique rejects e if any other entity of its type answers to one of
