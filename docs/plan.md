@@ -49,6 +49,9 @@ Every store operation is one bbolt transaction. Invariants that span records are
 - Deleting an entity also removes the links pointing at it, not just its edges.
 - Entity ranking fuses the trigram and BM25 rankings with reciprocal rank fusion (k = 60), as engRam fuses its legs.
 - Trigram matching compares the query against each whole name and alias and against each of their words, taking the best (like pg_trgm's `word_similarity`), so "davd" finds "David Kittle". Threshold 0.3.
+- Search results carry the placeholder in a `placeholder` field beside the hits. The CLI renders it as the trailing `(new)` row.
+- Search `limit` defaults to 20 when omitted or 0. There is no "unlimited" value and no config key until one is needed.
+- Update inputs are partial: an omitted field is unchanged. `aliases`, when given, replaces the whole list.
 - Search indexes are in memory, rebuilt on open, and updated under the same lock as the write that changes them.
 
 ## Milestones
@@ -58,7 +61,7 @@ Each ends with `task test` passing.
 - [x] **1. Scaffold.** `go.mod`, `Taskfile.yml` (`build`, `test`), cobra root, `loci version` with ldflags injection, viper config (XDG paths, `LOCI_*` overrides, `--config`, never writes the file).
 - [x] **2. Domain and store.** Closed type sets with inverse names, name normalization and validation, the case-fold function, bbolt schema and CRUD with the invariants above.
 - [x] **3. Search.** Trigram and BM25 indexes, fused entity ranking, memory BM25.
-- [ ] **4. Service.** Every tool in the table, including placeholder rotation on every search and create. Most tests live here.
+- [x] **4. Service.** Every tool in the table, including placeholder rotation on every search and create. Most tests live here.
 - [ ] **5. MCP.** Tool adapters over the service, tested with mcp-go's in-process client.
 - [ ] **6. Daemon.** Port engRam's spawn lock, ownership lock, version preamble, idle shutdown, and `loci serve` (the stdio ↔ socket pipe).
 - [ ] **7. CLI.** Cobra commands that call tools through an mcp-go client over the socket. Human-readable tables by default, `--json` prints the structured result. Parity test comparing registered tools with cobra commands, with an explicit allowlist for commands that are not tools (`version`, `serve`, `daemon`). End-to-end integration test through a real daemon.
