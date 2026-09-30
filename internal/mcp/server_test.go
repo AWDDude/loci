@@ -16,9 +16,9 @@ import (
 	"github.com/AWDDude/loci/internal/store"
 )
 
-// allTools is every tool Loci exposes. The CLI parity test in milestone 7
-// checks the cobra commands against the server's registered tools; this list
-// pins the server side.
+// allTools is every tool Loci exposes. The parity test in cmd/loci checks
+// the cobra commands against the server's registered tools; this list pins
+// the server side.
 var allTools = []string{
 	"edge_create", "edge_delete",
 	"entity_create", "entity_delete", "entity_get", "entity_search", "entity_update",
