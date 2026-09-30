@@ -89,6 +89,49 @@ Using an existing entity means using its uuid, and creating a new one means usin
 
 Everything an agent can do through MCP, a human can do through the `loci` CLI, and the reverse. Output is human-readable by default, and every command takes `--json`.
 
+## MCP setup
+
+There is no release yet, so [build from source](#building) and put the binary on your `PATH`:
+
+```bash
+task build
+cp loci ~/.local/bin/
+```
+
+### Claude Code
+
+```bash
+claude mcp add --scope user loci -- loci serve
+```
+
+`--scope user` makes Loci available in every project, which is what you want for a memory that spans them. Without it, Claude Code registers the server for the current project only. Confirm with `claude mcp list`. If `loci` is not on the `PATH` Claude Code sees, use the binary's full path.
+
+### Other MCP clients
+
+Any client that launches stdio servers takes the same command:
+
+```json
+{
+  "mcpServers": {
+    "loci": {
+      "command": "loci",
+      "args": ["serve"]
+    }
+  }
+}
+```
+
+### What `loci serve` does
+
+`loci serve` connects to a background daemon that owns the database, starting one if none is running. Any number of MCP sessions and CLI commands share that daemon, so they all see each other's writes immediately. Nothing needs installing or supervising, and no port is opened: the daemon listens on a unix socket beside the database, readable only by you.
+
+The daemon exits after 10 minutes with nothing attached. After an upgrade, the next client notices the daemon is running the old build and replaces it.
+
+```bash
+loci daemon status   # is one running, which build, which database
+loci daemon stop     # shut it down; the next client starts a fresh one
+```
+
 ## Architecture
 
 - **Storage:** [bbolt](https://github.com/etcd-io/bbolt), one file at `~/.local/share/loci/loci.bbolt`
