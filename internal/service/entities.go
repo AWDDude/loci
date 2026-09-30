@@ -7,10 +7,10 @@ import (
 
 // EntitySearchInput is the input to EntitySearch.
 type EntitySearchInput struct {
-	Query string
+	Query string `json:"query"`
 	// Type, if set, restricts results to one entity type.
-	Type  string
-	Limit int
+	Type  string `json:"type"`
+	Limit int    `json:"limit"`
 }
 
 // EntitySearchResult lists matching entities and the placeholder uuid that
@@ -49,11 +49,11 @@ func (s *Service) EntitySearch(in EntitySearchInput) (EntitySearchResult, error)
 
 // EntityCreateInput is the input to EntityCreate.
 type EntityCreateInput struct {
-	Placeholder string
-	Name        string
-	Aliases     []string
-	Description string
-	Type        string
+	Placeholder string   `json:"placeholder"`
+	Name        string   `json:"name"`
+	Aliases     []string `json:"aliases"`
+	Description string   `json:"description"`
+	Type        string   `json:"type"`
 }
 
 // EntityCreate creates an entity. Placeholder must come from the latest
@@ -145,11 +145,11 @@ func (s *Service) EntityGet(id string) (EntityDetail, error) {
 // EntityUpdateInput is the input to EntityUpdate. A nil field is left
 // unchanged; Aliases, when set, replaces the whole list.
 type EntityUpdateInput struct {
-	ID          string
-	Name        *string
-	Aliases     *[]string
-	Description *string
-	Type        *string
+	ID          string    `json:"id"`
+	Name        *string   `json:"name"`
+	Aliases     *[]string `json:"aliases"`
+	Description *string   `json:"description"`
+	Type        *string   `json:"type"`
 }
 
 // EntityUpdate edits an entity. Renaming does not keep the old name as an

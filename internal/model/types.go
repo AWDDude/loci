@@ -117,6 +117,12 @@ func ParseEdgeType(s string) (t EdgeType, flipped bool, err error) {
 			return t, true, nil
 		}
 	}
+	return "", false, fmt.Errorf("unknown edge type %q (valid: %s)", s, strings.Join(EdgeTypeNames(), ", "))
+}
+
+// EdgeTypeNames lists every name ParseEdgeType accepts: each forward type
+// followed by its inverse, when it has a distinct one.
+func EdgeTypeNames() []string {
 	names := make([]string, 0, 2*len(EdgeTypes))
 	for _, t := range EdgeTypes {
 		names = append(names, string(t))
@@ -124,7 +130,7 @@ func ParseEdgeType(s string) (t EdgeType, flipped bool, err error) {
 			names = append(names, t.Inverse())
 		}
 	}
-	return "", false, fmt.Errorf("unknown edge type %q (valid: %s)", s, strings.Join(names, ", "))
+	return names
 }
 
 func unknownType[T ~string](kind, s string, valid []T) error {

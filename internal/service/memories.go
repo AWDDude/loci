@@ -7,8 +7,8 @@ import (
 
 // MemorySearchInput is the input to MemorySearch.
 type MemorySearchInput struct {
-	Query string
-	Limit int
+	Query string `json:"query"`
+	Limit int    `json:"limit"`
 }
 
 // MemorySearchResult lists matching memories and the placeholder uuid that
@@ -47,10 +47,10 @@ type LinkSpec struct {
 
 // MemoryCreateInput is the input to MemoryCreate.
 type MemoryCreateInput struct {
-	Placeholder string
-	Title       string
-	Content     string
-	Links       []LinkSpec
+	Placeholder string     `json:"placeholder"`
+	Title       string     `json:"title"`
+	Content     string     `json:"content"`
+	Links       []LinkSpec `json:"links"`
 }
 
 // LinkView is one of a memory's links, with the entity it points to.
@@ -120,9 +120,9 @@ func (s *Service) memoryDetail(m model.Memory, links []model.Link) (MemoryDetail
 // MemoryUpdateInput is the input to MemoryUpdate. A nil field is left
 // unchanged.
 type MemoryUpdateInput struct {
-	ID      string
-	Title   *string
-	Content *string
+	ID      string  `json:"id"`
+	Title   *string `json:"title"`
+	Content *string `json:"content"`
 }
 
 // MemoryUpdate edits a memory's title or content. Links are changed with
@@ -160,9 +160,9 @@ func (s *Service) MemoryDelete(id string) error {
 
 // MemoryListInput is the input to MemoryList.
 type MemoryListInput struct {
-	Entity string
+	Entity string `json:"entity"`
 	// LinkType, if set, restricts results to memories linked by that type.
-	LinkType string
+	LinkType string `json:"link_type"`
 }
 
 // MemoryList returns the full memories linked to an entity, newest first.

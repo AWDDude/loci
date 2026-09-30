@@ -6,9 +6,9 @@ import (
 
 // LinkInput identifies a link by its triple.
 type LinkInput struct {
-	Memory string
-	Type   string
-	Entity string
+	Memory string `json:"memory"`
+	Type   string `json:"type"`
+	Entity string `json:"entity"`
 }
 
 // LinkCreate links a memory to an entity. Creating a link that already
@@ -57,9 +57,9 @@ func parseLink(typ, entity string) (model.Link, error) {
 // EdgeInput identifies an edge by its triple. Type may be a forward name
 // (parent_of) or an inverse one (child_of).
 type EdgeInput struct {
-	From string
-	Type string
-	To   string
+	From string `json:"from"`
+	Type string `json:"type"`
+	To   string `json:"to"`
 }
 
 // EdgeCreate relates two entities and returns the edge as stored. Creating

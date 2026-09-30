@@ -52,6 +52,9 @@ Every store operation is one bbolt transaction. Invariants that span records are
 - Search results carry the placeholder in a `placeholder` field beside the hits. The CLI renders it as the trailing `(new)` row.
 - Search `limit` defaults to 20 when omitted or 0. There is no "unlimited" value and no config key until one is needed.
 - Update inputs are partial: an omitted field is unchanged. `aliases`, when given, replaces the whole list.
+- Service input structs carry the JSON tags that are the MCP argument names, so an MCP adapter binds straight into them. The wire names live in one place.
+- Tool enums (entity, link and edge types) are generated from `model`, and a test checks them against it.
+- Delete tools return `{"deleted": <id or triple>}`. Service errors come back as MCP tool errors (`isError: true`) with the service's message, never as protocol faults.
 - Search indexes are in memory, rebuilt on open, and updated under the same lock as the write that changes them.
 
 ## Milestones
@@ -62,6 +65,6 @@ Each ends with `task test` passing.
 - [x] **2. Domain and store.** Closed type sets with inverse names, name normalization and validation, the case-fold function, bbolt schema and CRUD with the invariants above.
 - [x] **3. Search.** Trigram and BM25 indexes, fused entity ranking, memory BM25.
 - [x] **4. Service.** Every tool in the table, including placeholder rotation on every search and create. Most tests live here.
-- [ ] **5. MCP.** Tool adapters over the service, tested with mcp-go's in-process client.
+- [x] **5. MCP.** Tool adapters over the service, tested with mcp-go's in-process client.
 - [ ] **6. Daemon.** Port engRam's spawn lock, ownership lock, version preamble, idle shutdown, and `loci serve` (the stdio ↔ socket pipe).
 - [ ] **7. CLI.** Cobra commands that call tools through an mcp-go client over the socket. Human-readable tables by default, `--json` prints the structured result. Parity test comparing registered tools with cobra commands, with an explicit allowlist for commands that are not tools (`version`, `serve`, `daemon`). End-to-end integration test through a real daemon.
