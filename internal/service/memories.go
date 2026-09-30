@@ -165,24 +165,30 @@ type MemoryListInput struct {
 	LinkType string `json:"link_type"`
 }
 
+// MemoryListResult is the memories linked to an entity. It is an object
+// rather than a bare list because MCP structured content must be an object.
+type MemoryListResult struct {
+	Memories []store.LinkedMemory `json:"memories"`
+}
+
 // MemoryList returns the full memories linked to an entity, newest first.
-func (s *Service) MemoryList(in MemoryListInput) ([]store.LinkedMemory, error) {
+func (s *Service) MemoryList(in MemoryListInput) (MemoryListResult, error) {
 	entity, err := required("entity", in.Entity)
 	if err != nil {
-		return nil, err
+		return MemoryListResult{}, err
 	}
 	var lt model.LinkType
 	if in.LinkType != "" {
 		if lt, err = model.ParseLinkType(in.LinkType); err != nil {
-			return nil, err
+			return MemoryListResult{}, err
 		}
 	}
 	out, err := s.store.EntityMemories(entity, lt)
 	if err != nil {
-		return nil, err
+		return MemoryListResult{}, err
 	}
 	if out == nil {
 		out = []store.LinkedMemory{}
 	}
-	return out, nil
+	return MemoryListResult{Memories: out}, nil
 }

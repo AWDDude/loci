@@ -73,7 +73,8 @@ func TestReadmeWalk(t *testing.T) {
 		t.Fatalf("step 2, david's edges: %+v", detail.Edges)
 	}
 
-	mems, err := s.MemoryList(MemoryListInput{Entity: noah.ID, LinkType: "attribute"})
+	res, err := s.MemoryList(MemoryListInput{Entity: noah.ID, LinkType: "attribute"})
+	mems := res.Memories
 	if err != nil || len(mems) != 1 || !strings.Contains(mems[0].Memory.Content, "March 3") {
 		t.Fatalf("step 3, noah's attributes: %+v, %v", mems, err)
 	}

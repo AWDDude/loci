@@ -2,7 +2,7 @@
 
 Entity-oriented persistent memory MCP server for coding agents. Single statically-linked Go binary. Experimental successor to engRam (`~/projects/AWDDude/engRam`), whose daemon and config handling are the reference implementation for the same concerns here.
 
-**Status: design phase.** No code exists yet. README.md describes the intended design, and this file holds the rules the code must follow.
+**Status: first version implemented, unreleased.** README.md describes the design, and this file holds the rules the code must follow. `docs/plan.md` records the build order and the decisions made while building.
 
 ## Invariants
 

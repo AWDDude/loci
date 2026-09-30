@@ -58,6 +58,8 @@ Every store operation is one bbolt transaction. Invariants that span records are
 - The daemon is engRam's, ported: spawn lock, ownership lock, version preamble, idle shutdown after 10 minutes, retirement of a daemon running another build. There is no model to load, so the daemon opens the store synchronously and the spawn timeout is 15s.
 - A spawned daemon is passed the client's `--config` explicitly (as an absolute path). engRam passed its config path through an environment variable, which a flag does not do on its own.
 - A client that hangs up before reading the preamble (`loci daemon status`, liveness probes) is an ordinary session end, not logged as a failure.
+- CLI commands take required uuids positionally and everything else as flags. `memory create` takes links as repeatable `--link TYPE:ENTITY_UUID`, and `--content -` reads stdin. Update commands send only the flags given.
+- `memory_list` returns `{"memories": [...]}` rather than a bare list, because MCP structured content must be an object.
 - Search indexes are in memory, rebuilt on open, and updated under the same lock as the write that changes them.
 
 ## Milestones
@@ -70,4 +72,4 @@ Each ends with `task test` passing.
 - [x] **4. Service.** Every tool in the table, including placeholder rotation on every search and create. Most tests live here.
 - [x] **5. MCP.** Tool adapters over the service, tested with mcp-go's in-process client.
 - [x] **6. Daemon.** Port engRam's spawn lock, ownership lock, version preamble, idle shutdown, and `loci serve` (the stdio ↔ socket pipe).
-- [ ] **7. CLI.** Cobra commands that call tools through an mcp-go client over the socket. Human-readable tables by default, `--json` prints the structured result. Parity test comparing registered tools with cobra commands, with an explicit allowlist for commands that are not tools (`version`, `serve`, `daemon`). End-to-end integration test through a real daemon.
+- [x] **7. CLI.** Cobra commands that call tools through an mcp-go client over the socket. Human-readable tables by default, `--json` prints the structured result. Parity test comparing registered tools with cobra commands, with an explicit allowlist for commands that are not tools (`version`, `serve`, `daemon`). End-to-end integration test through a real daemon.

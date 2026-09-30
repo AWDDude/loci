@@ -2,7 +2,7 @@
 
 An entity-oriented persistent memory MCP server for coding agents. Single statically-linked Go binary, no external services.
 
-> **Status: design phase.** Nothing works yet. This README describes the intended design, and details will change as it is built.
+> **Status: experimental.** The first version works end to end but has not been released. Details may still change.
 
 **Name:** from the *method of loci*, the memory-palace technique where you remember things by attaching them to places. In Loci, every memory must be attached to an entity before it can be stored.
 

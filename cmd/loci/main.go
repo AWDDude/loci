@@ -7,6 +7,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/AWDDude/loci/internal/cli"
 )
 
 // version is the build version, injected by `task build` via
@@ -36,6 +38,7 @@ func newRootCmd() *cobra.Command {
 		newServeCmd(&flags),
 		newDaemonCmd(&flags),
 	)
+	cli.AddCommands(root, &cli.Env{ConfigPath: &flags.config, JSON: &flags.json, Version: version})
 	return root
 }
 
