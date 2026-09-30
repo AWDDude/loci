@@ -153,6 +153,18 @@ task build   # static binary at ./loci
 task test
 ```
 
+### Releasing
+
+Releases are cut from `main` by pushing a tag. CI runs `task release`, which refuses a tag that is not on `main`, runs the tests, publishes the GitHub release, and updates the [Homebrew tap](https://github.com/AWDDude/homebrew-tap).
+
+```bash
+git checkout main && git pull
+git tag -a v0.1.0 -m v0.1.0
+git push origin v0.1.0
+```
+
+To check a release build locally without publishing anything, run `task dist TAG=v0.1.0 && task formula TAG=v0.1.0` and look in `dist/`.
+
 ## License
 
 [MIT](LICENSE)

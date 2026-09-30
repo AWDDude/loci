@@ -148,7 +148,14 @@ internal/cli/       # cobra commands, each an MCP client of the daemon
 - **Task is the only build entry point** (`Taskfile.yml`). No Makefile.
 - `task build`: `CGO_ENABLED=0` static binary at `./loci`, version injected via `-ldflags -X`.
 - `task test`: `go test -race ./...`.
-- **No GoReleaser.** engRam builds with both Make and GoReleaser, which means two places where build flags are defined. Here a future `task release` will cross-compile, create the GitHub release with `gh release create`, and update the `AWDDude/tap` Homebrew formula, all run from CI. Releases are not set up yet. If maintaining the release task becomes a burden, switch to GoReleaser rather than running both.
+- **No GoReleaser.** engRam builds with both Make and GoReleaser, which means two places where build flags are defined. Here `task release` does what GoReleaser does for engRam. If maintaining it becomes a burden, switch to GoReleaser rather than running both.
+- **Releasing:** push a `vX.Y.Z` tag on `main`. `.github/workflows/release.yml` only installs Go and Task and runs `task release TAG=<tag>`, so the whole release is defined in the Taskfile:
+  1. `check-tag`: the tag is `vX.Y.Z` and on `origin/main`. It runs before anything is published, so a bad tag publishes nothing.
+  2. `test`, then `dist`: static binaries for darwin/linux × amd64/arm64 and windows/amd64 (engRam's set), as `loci_<os>_<arch>.tar.gz` (`.zip` on Windows) with LICENSE and README, plus `checksums.txt`. The version is the tag without its `v`.
+  3. `formula`: `dist/loci.rb` from the checksums. It must pass `brew style`.
+  4. `gh release create` with notes listing the commits since the previous tag, minus `docs`, `test` and `chore`.
+  5. The formula is pushed to `Formula/loci.rb` in `AWDDude/homebrew-tap` (installed as `AWDDude/tap/loci`) through the contents API.
+- `task dist TAG=vX.Y.Z` and `task formula TAG=vX.Y.Z` run locally without publishing. `task release` needs `GH_TOKEN` (release in this repo) and `TAP_GITHUB_TOKEN` (push to the tap), which CI takes from the `GITHUB_TOKEN` and the `TAP_GITHUB_TOKEN` repo secret.
 
 ## Conventions
 
