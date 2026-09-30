@@ -86,7 +86,8 @@ Rejected alternatives: separate search tokens (the user dislikes passing tokens 
 ~/.local/share/loci/     # $XDG_DATA_HOME/loci if set
 ├── loci.bbolt           # .bbolt so nothing mistakes it for SQLite
 ├── loci.sock            # daemon socket (0600)
-├── daemon.lock
+├── daemon.lock          # held by the daemon for its whole life
+├── spawn.lock           # held by a client while it starts a daemon
 ├── daemon.pid
 └── daemon.log
 ```

@@ -55,6 +55,9 @@ Every store operation is one bbolt transaction. Invariants that span records are
 - Service input structs carry the JSON tags that are the MCP argument names, so an MCP adapter binds straight into them. The wire names live in one place.
 - Tool enums (entity, link and edge types) are generated from `model`, and a test checks them against it.
 - Delete tools return `{"deleted": <id or triple>}`. Service errors come back as MCP tool errors (`isError: true`) with the service's message, never as protocol faults.
+- The daemon is engRam's, ported: spawn lock, ownership lock, version preamble, idle shutdown after 10 minutes, retirement of a daemon running another build. There is no model to load, so the daemon opens the store synchronously and the spawn timeout is 15s.
+- A spawned daemon is passed the client's `--config` explicitly (as an absolute path). engRam passed its config path through an environment variable, which a flag does not do on its own.
+- A client that hangs up before reading the preamble (`loci daemon status`, liveness probes) is an ordinary session end, not logged as a failure.
 - Search indexes are in memory, rebuilt on open, and updated under the same lock as the write that changes them.
 
 ## Milestones
@@ -66,5 +69,5 @@ Each ends with `task test` passing.
 - [x] **3. Search.** Trigram and BM25 indexes, fused entity ranking, memory BM25.
 - [x] **4. Service.** Every tool in the table, including placeholder rotation on every search and create. Most tests live here.
 - [x] **5. MCP.** Tool adapters over the service, tested with mcp-go's in-process client.
-- [ ] **6. Daemon.** Port engRam's spawn lock, ownership lock, version preamble, idle shutdown, and `loci serve` (the stdio ↔ socket pipe).
+- [x] **6. Daemon.** Port engRam's spawn lock, ownership lock, version preamble, idle shutdown, and `loci serve` (the stdio ↔ socket pipe).
 - [ ] **7. CLI.** Cobra commands that call tools through an mcp-go client over the socket. Human-readable tables by default, `--json` prints the structured result. Parity test comparing registered tools with cobra commands, with an explicit allowlist for commands that are not tools (`version`, `serve`, `daemon`). End-to-end integration test through a real daemon.

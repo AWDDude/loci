@@ -31,7 +31,11 @@ func newRootCmd() *cobra.Command {
 	root.PersistentFlags().StringVar(&flags.config, "config", "", "config file (default $XDG_CONFIG_HOME/loci/config.yaml)")
 	root.PersistentFlags().BoolVar(&flags.json, "json", false, "print JSON instead of human-readable output")
 
-	root.AddCommand(newVersionCmd(&flags))
+	root.AddCommand(
+		newVersionCmd(&flags),
+		newServeCmd(&flags),
+		newDaemonCmd(&flags),
+	)
 	return root
 }
 
