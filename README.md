@@ -2,7 +2,7 @@
 
 An entity-oriented persistent memory MCP server for coding agents. Single statically-linked Go binary, no external services.
 
-> **Status: experimental.** The first version works end to end but has not been released. Details may still change.
+> **Status: experimental.** Released, and working end to end, but details may still change between versions.
 
 **Name:** from the *method of loci*, the memory-palace technique where you remember things by attaching them to places. In Loci, every memory must be attached to an entity before it can be stored.
 
@@ -91,12 +91,13 @@ Everything an agent can do through MCP, a human can do through the `loci` CLI, a
 
 ## MCP setup
 
-There is no release yet, so [build from source](#building) and put the binary on your `PATH`:
+Install with Homebrew (macOS and Linux):
 
 ```bash
-task build
-cp loci ~/.local/bin/
+brew install AWDDude/tap/loci
 ```
+
+Other platforms can download an archive from the [releases page](https://github.com/AWDDude/loci/releases), or [build from source](#building) and put `./loci` on your `PATH`.
 
 ### Claude Code
 
